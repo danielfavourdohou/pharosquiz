@@ -70,6 +70,7 @@ const CreateQuiz = () => {
     setIsLoading(true);
     
     try {
+      // We'll provide an empty code string that will be replaced by the trigger
       // Insert quiz into database
       const { data: quizData, error: quizError } = await supabase
         .from('quizzes')
@@ -79,7 +80,8 @@ const CreateQuiz = () => {
           creator_id: user.id,
           time_per_question: parseInt(timePerQuestion),
           prize_pool: prizePool ? parseFloat(prizePool) : 0,
-          status: 'draft'
+          status: 'draft',
+          code: '' // Add empty code that will be replaced by the database trigger
         })
         .select('id, code')
         .single();
