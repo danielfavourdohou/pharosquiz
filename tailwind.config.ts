@@ -63,13 +63,22 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom pharos colors
+				// Web3 themed colors
 				pharos: {
 					primary: '#9b87f5',
 					secondary: '#7E69AB',
 					tertiary: '#6E59A5',
 					dark: '#1A1F2C',
 					light: '#D6BCFA',
+					accent1: '#8B5CF6', // Vivid purple
+					accent2: '#D946EF', // Magenta pink
+					accent3: '#1EAEDB', // Bright blue
+				},
+				crypto: {
+					ethereum: '#627EEA',
+					bitcoin: '#F7931A',
+					solana: '#9945FF',
+					polygon: '#8247E5',
 				},
 			},
 			borderRadius: {
@@ -111,6 +120,14 @@ export default {
 				'pulse-scale': {
 					'0%, 100%': { transform: 'scale(1)' },
 					'50%': { transform: 'scale(1.05)' }
+				},
+				'glow': {
+					'0%, 100%': { filter: 'drop-shadow(0 0 2px rgba(155, 135, 245, 0.5))' },
+					'50%': { filter: 'drop-shadow(0 0 10px rgba(155, 135, 245, 0.8))' }
+				},
+				'slide-up': {
+					'0%': { transform: 'translateY(10px)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' }
 				}
 			},
 			animation: {
@@ -118,7 +135,9 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.5s ease-out',
 				'countdown': 'countdown linear',
-				'pulse-scale': 'pulse-scale 2s ease-in-out infinite'
+				'pulse-scale': 'pulse-scale 2s ease-in-out infinite',
+				'glow': 'glow 2s ease-in-out infinite',
+				'slide-up': 'slide-up 0.3s ease-out'
 			}
 		}
 	},
