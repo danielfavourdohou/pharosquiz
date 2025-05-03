@@ -28,14 +28,23 @@ export default function QuizTimer({ duration, onTimeUp }: QuizTimerProps) {
     return () => clearInterval(timer);
   }, [timeLeft, duration, onTimeUp]);
   
+  // Determine the color based on progress
+  const getProgressColor = () => {
+    if (progress < 30) return 'bg-destructive';
+    if (progress < 60) return 'bg-yellow-500';
+    return 'bg-green-500';
+  };
+  
   return (
     <div className="w-full space-y-2">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">Time Left</span>
         <span className="text-lg font-bold">{timeLeft}s</span>
       </div>
-      <Progress value={progress} className="h-2" 
-        indicatorClassName={`${progress < 30 ? 'bg-destructive' : progress < 60 ? 'bg-yellow-500' : 'bg-green-500'}`} 
+      <Progress 
+        value={progress} 
+        className="h-2"
+        indicatorClassName={getProgressColor()}
       />
     </div>
   );
