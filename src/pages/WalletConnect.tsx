@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -5,11 +6,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Layout from '@/components/layout/Layout';
 import { toast } from '@/components/ui/sonner';
 import { Wallet, ArrowLeft } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 
 const WalletConnect = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const connectMetaMask = async () => {
     if (!window.ethereum) {
@@ -31,14 +34,21 @@ const WalletConnect = () => {
         params: [message, address],
       });
 
-      // Here you would typically verify the signature on your backend
-      // For now, we'll just store the wallet address in Supabase
-      const { data, error } = await supabase.auth.updateUser({
-        data: { wallet_address: address }
-      });
+      if (user) {
+        // Update existing user with wallet address
+        const { error } = await supabase.auth.updateUser({
+          data: { wallet_address: address }
+        });
 
-      if (error) {
-        toast.error("Failed to update user with wallet address");
+        if (error) {
+          toast.error("Failed to update user with wallet address");
+          return;
+        }
+      } else {
+        // For non-logged-in users, create a new account with just the wallet
+        // In a full implementation, this would involve a more complex flow
+        toast.error("Please log in before connecting your wallet");
+        navigate('/login');
         return;
       }
 
@@ -65,13 +75,20 @@ const WalletConnect = () => {
       const resp = await window.solana.connect();
       const address = resp.publicKey.toString();
       
-      // Update user with wallet address
-      const { data, error } = await supabase.auth.updateUser({
-        data: { wallet_address: address }
-      });
+      if (user) {
+        // Update existing user with wallet address
+        const { error } = await supabase.auth.updateUser({
+          data: { wallet_address: address }
+        });
 
-      if (error) {
-        toast.error("Failed to update user with wallet address");
+        if (error) {
+          toast.error("Failed to update user with wallet address");
+          return;
+        }
+      } else {
+        // For non-logged-in users, create a new account with just the wallet
+        toast.error("Please log in before connecting your wallet");
+        navigate('/login');
         return;
       }
 

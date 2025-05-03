@@ -1,66 +1,26 @@
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
-  SheetClose,
 } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Menu, Wallet, LogIn, LogOut, UserPlus } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { toast } from '@/components/ui/sonner';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Header() {
   const isMobile = useIsMobile();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
   const navigate = useNavigate();
+  const { isAuthenticated, user, signOut } = useAuth();
   
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        setIsAuthenticated(true);
-        
-        // Check if wallet address exists
-        const { data: userData } = await supabase.auth.getUser();
-        if (userData?.user?.user_metadata?.wallet_address) {
-          setWalletConnected(true);
-          setWalletAddress(userData.user.user_metadata.wallet_address);
-        }
-      }
-    };
-    
-    checkSession();
-    
-    // Set up auth state change listener
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN') {
-        setIsAuthenticated(true);
-        
-        // Check for wallet address
-        if (session?.user?.user_metadata?.wallet_address) {
-          setWalletConnected(true);
-          setWalletAddress(session.user.user_metadata.wallet_address);
-        }
-      } else if (event === 'SIGNED_OUT') {
-        setIsAuthenticated(false);
-        setWalletConnected(false);
-        setWalletAddress('');
-      }
-    });
-    
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     toast.success('Logged out successfully');
     navigate('/');
   };
@@ -115,8 +75,12 @@ export default function Header() {
     </div>
   );
 
-  const WalletButton = () => (
-    walletConnected ? (
+  const WalletButton = () => {
+    // Check for wallet address in user metadata
+    const walletConnected = user?.user_metadata?.wallet_address;
+    const walletAddress = user?.user_metadata?.wallet_address || '';
+    
+    return walletConnected ? (
       <Button 
         variant="outline" 
         className="border-primary/20"
@@ -135,8 +99,8 @@ export default function Header() {
           Connect Wallet
         </Button>
       </Link>
-    )
-  );
+    );
+  };
 
   return (
     <header className="border-b sticky top-0 bg-background z-10">
@@ -175,7 +139,7 @@ export default function Header() {
             <nav className="flex space-x-6">
               <NavLinks />
             </nav>
-            <WalletButton />
+            {isAuthenticated && <WalletButton />}
             <AuthButtons />
             <ThemeToggle />
           </div>

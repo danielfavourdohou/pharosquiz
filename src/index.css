@@ -5,82 +5,78 @@
 
 @layer base {
   :root {
-    --background: 260 33% 98%;
-    --foreground: 260 33% 15%;
-
+    /* Base theme colors */
+    --background: 230 33% 98%;
+    --foreground: 230 33% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 260 33% 15%;
-
+    --card-foreground: 230 33% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 260 33% 15%;
-
-    --primary: 265 84% 75%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 267 30% 54%;
+    --popover-foreground: 230 33% 15%;
+    --primary: 182 100% 50%; /* Neon Cyan */
+    --primary-foreground: 0 0% 0%;
+    --secondary: 270 100% 50%; /* Electric Purple */
     --secondary-foreground: 0 0% 100%;
-
-    --muted: 260 20% 94%;
-    --muted-foreground: 260 10% 45%;
-
-    --accent: 260 20% 94%;
-    --accent-foreground: 260 33% 15%;
-
-    --destructive: 0 84.2% 60.2%;
+    --muted: 230 20% 94%;
+    --muted-foreground: 230 10% 45%;
+    --accent: 230 20% 94%;
+    --accent-foreground: 230 33% 15%;
+    --destructive: 333 95% 62%; /* Magenta Glow */
     --destructive-foreground: 0 0% 100%;
-
-    --border: 260 15% 90%;
-    --input: 260 15% 90%;
-    --ring: 260 84% 80%;
-
+    --border: 230 15% 90%;
+    --input: 230 15% 90%;
+    --ring: 182 100% 45%;
     --radius: 0.5rem;
 
+    /* Custom Pharos theme colors */
+    --pharos-navy: 230 58% 11%; /* #0B0F2A */
+    --pharos-cyan: 182 100% 50%; /* #00FFF0 */
+    --pharos-purple: 270 100% 50%; /* #8A00FF */
+    --pharos-magenta: 333 100% 65%; /* #FF4ECD */
+    --pharos-teal: 167 74% 50%; /* #1CE1C1 */
+    --pharos-slate: 216 67% 98%; /* #F7F9FC */
+    --pharos-gray: 220 33% 26%; /* #2E3A59 */
+
+    /* Sidebar colors */
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-foreground: 230 5.3% 26.1%;
+    --sidebar-primary: 230 5.9% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-accent: 230 4.8% 95.9%;
+    --sidebar-accent-foreground: 230 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 260 33% 10%;
-    --foreground: 260 10% 95%;
+    /* Base theme colors for dark mode */
+    --background: 230 58% 11%; /* Pharos Navy */
+    --foreground: 216 67% 98%; /* Slate White */
+    --card: 230 40% 15%;
+    --card-foreground: 216 67% 98%;
+    --popover: 230 40% 15%;
+    --popover-foreground: 216 67% 98%;
+    --primary: 182 100% 50%; /* Neon Cyan */
+    --primary-foreground: 0 0% 0%;
+    --secondary: 270 100% 50%; /* Electric Purple */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 230 25% 20%;
+    --muted-foreground: 230 10% 70%;
+    --accent: 230 25% 20%;
+    --accent-foreground: 216 67% 98%;
+    --destructive: 333 95% 62%; /* Magenta Glow */
+    --destructive-foreground: 0 0% 100%;
+    --border: 230 25% 25%;
+    --input: 230 25% 25%;
+    --ring: 182 100% 45%;
 
-    --card: 260 33% 12%;
-    --card-foreground: 260 10% 95%;
-
-    --popover: 260 33% 12%;
-    --popover-foreground: 260 10% 95%;
-
-    --primary: 265 84% 75%;
-    --primary-foreground: 260 10% 95%;
-
-    --secondary: 267 30% 54%;
-    --secondary-foreground: 260 10% 95%;
-
-    --muted: 260 15% 20%;
-    --muted-foreground: 260 10% 70%;
-
-    --accent: 260 15% 20%;
-    --accent-foreground: 260 10% 95%;
-
-    --destructive: 0 62.8% 40.6%;
-    --destructive-foreground: 260 10% 95%;
-
-    --border: 260 15% 25%;
-    --input: 260 15% 25%;
-    --ring: 260 84% 70%;
-
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
+    /* Sidebar colors for dark mode */
+    --sidebar-background: 230 5.9% 10%;
+    --sidebar-foreground: 230 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-accent: 230 3.7% 15.9%;
+    --sidebar-accent-foreground: 230 4.8% 95.9%;
+    --sidebar-border: 230 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
@@ -95,21 +91,59 @@
   }
 }
 
+/* Pharos custom color utilities */
+.text-pharos-cyan {
+  color: hsl(var(--pharos-cyan));
+}
+
+.text-pharos-purple {
+  color: hsl(var(--pharos-purple));
+}
+
+.text-pharos-magenta {
+  color: hsl(var(--pharos-magenta));
+}
+
+.text-pharos-teal {
+  color: hsl(var(--pharos-teal));
+}
+
+.bg-pharos-navy {
+  background-color: hsl(var(--pharos-navy));
+}
+
+.bg-pharos-cyan {
+  background-color: hsl(var(--pharos-cyan));
+}
+
+.bg-pharos-purple {
+  background-color: hsl(var(--pharos-purple));
+}
+
+.bg-pharos-magenta {
+  background-color: hsl(var(--pharos-magenta));
+}
+
+.bg-pharos-teal {
+  background-color: hsl(var(--pharos-teal));
+}
+
+/* Gradients and effects */
 .gradient-text {
-  @apply bg-gradient-to-r from-pharos-primary to-pharos-secondary bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-pharos-cyan to-pharos-purple bg-clip-text text-transparent;
 }
 
 .gradient-bg {
-  @apply bg-gradient-to-r from-pharos-primary to-pharos-secondary;
+  @apply bg-gradient-to-r from-pharos-cyan to-pharos-purple text-black;
 }
 
 /* Web3 Style Animations */
 @keyframes glow {
   0%, 100% { 
-    filter: drop-shadow(0 0 2px rgba(155, 135, 245, 0.5)); 
+    filter: drop-shadow(0 0 2px rgba(0, 255, 240, 0.5)); 
   }
   50% { 
-    filter: drop-shadow(0 0 10px rgba(155, 135, 245, 0.8)); 
+    filter: drop-shadow(0 0 10px rgba(0, 255, 240, 0.8)); 
   }
 }
 
@@ -119,7 +153,7 @@
 
 .hover-glow:hover {
   @apply transition-all duration-200;
-  filter: drop-shadow(0 0 8px rgba(155, 135, 245, 0.7));
+  filter: drop-shadow(0 0 8px rgba(0, 255, 240, 0.7));
 }
 
 /* Neo-brutalism style for cards */
@@ -135,4 +169,24 @@
 /* Card hover effects */
 .card-hover-effect {
   @apply transition-transform duration-300 hover:scale-[1.02];
+}
+
+/* Animation for quiz countdown */
+@keyframes pulse-scale {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-pulse-scale {
+  animation: pulse-scale 1s ease-in-out infinite;
+}
+
+/* Fade in animation */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
 }

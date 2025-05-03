@@ -5,8 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import { SessionContextProvider } from '@supabase/auth-helpers-react';
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { AuthProvider } from "@/context/AuthContext";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 // Pages
 import Index from "./pages/Index";
@@ -23,14 +23,8 @@ import WalletConnect from "./pages/WalletConnect";
 const queryClient = new QueryClient();
 
 const App = () => {
-  if (!isSupabaseConfigured()) {
-    console.warn(
-      "Supabase is not properly configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables."
-    );
-  }
-
   return (
-    <SessionContextProvider supabaseClient={supabase}>
+    <AuthProvider>
       <ThemeProvider defaultTheme="dark">
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
@@ -43,10 +37,26 @@ const App = () => {
                 <Route path="/register" element={<Register />} />
                 <Route path="/wallet-connect" element={<WalletConnect />} />
                 <Route path="/join-quiz" element={<JoinQuiz />} />
-                <Route path="/create-quiz" element={<CreateQuiz />} />
-                <Route path="/quiz-lobby/:quizCode" element={<QuizLobby />} />
-                <Route path="/play-quiz/:quizCode" element={<PlayQuiz />} />
-                <Route path="/quiz-results/:quizCode" element={<QuizResults />} />
+                <Route path="/create-quiz" element={
+                  <ProtectedRoute>
+                    <CreateQuiz />
+                  </ProtectedRoute>
+                } />
+                <Route path="/quiz-lobby/:quizCode" element={
+                  <ProtectedRoute>
+                    <QuizLobby />
+                  </ProtectedRoute>
+                } />
+                <Route path="/play-quiz/:quizCode" element={
+                  <ProtectedRoute>
+                    <PlayQuiz />
+                  </ProtectedRoute>
+                } />
+                <Route path="/quiz-results/:quizCode" element={
+                  <ProtectedRoute>
+                    <QuizResults />
+                  </ProtectedRoute>
+                } />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
@@ -54,7 +64,7 @@ const App = () => {
           </TooltipProvider>
         </QueryClientProvider>
       </ThemeProvider>
-    </SessionContextProvider>
+    </AuthProvider>
   );
 };
 

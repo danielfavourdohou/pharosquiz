@@ -13,6 +13,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Question {
   text: string;
@@ -23,6 +25,7 @@ interface Question {
 const CreateQuiz = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   
   // Quiz form state
   const [title, setTitle] = useState('');
@@ -42,7 +45,7 @@ const CreateQuiz = () => {
   ]);
   
   // Handle quiz creation
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
@@ -54,15 +57,67 @@ const CreateQuiz = () => {
       });
       return;
     }
+
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "You must be logged in to create a quiz",
+      });
+      return;
+    }
     
     setIsLoading(true);
     
-    // Mock API call for quiz creation
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Insert quiz into database
+      const { data: quizData, error: quizError } = await supabase
+        .from('quizzes')
+        .insert({
+          title,
+          description: description || null,
+          creator_id: user.id,
+          time_per_question: parseInt(timePerQuestion),
+          prize_pool: prizePool ? parseFloat(prizePool) : 0,
+          status: 'draft'
+        })
+        .select('id, code')
+        .single();
       
-      // Generate a random 6-digit code
-      const quizCode = Math.floor(100000 + Math.random() * 900000).toString();
+      if (quizError) {
+        console.error('Error creating quiz:', quizError);
+        toast({
+          variant: "destructive",
+          title: "Error Creating Quiz",
+          description: quizError.message,
+        });
+        return;
+      }
+      
+      // For demo, we'll just create the first question
+      if (questions[0].text) {
+        const { error: questionError } = await supabase
+          .from('questions')
+          .insert({
+            quiz_id: quizData.id,
+            question_text: questions[0].text,
+            correct_option: questions[0].correctOptionIndex,
+            order_index: 0,
+          });
+        
+        if (questionError) {
+          console.error('Error creating question:', questionError);
+        } else {
+          // Add options for the question
+          const optionsToInsert = questions[0].options.map((optionText, index) => ({
+            question_id: quizData.id, // This would actually be the question's ID in a real implementation
+            option_text: optionText || `Option ${index + 1}`,
+            option_index: index,
+          }));
+          
+          await supabase.from('options').insert(optionsToInsert);
+        }
+      }
       
       toast({
         title: "Quiz Created Successfully",
@@ -70,8 +125,17 @@ const CreateQuiz = () => {
       });
       
       // Navigate to the lobby with the new quiz code
-      navigate(`/quiz-lobby/${quizCode}`);
-    }, 1500);
+      navigate(`/quiz-lobby/${quizData.code}`);
+    } catch (error) {
+      console.error('Error creating quiz:', error);
+      toast({
+        variant: "destructive",
+        title: "Error Creating Quiz",
+        description: "An unexpected error occurred. Please try again later.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   // Simple demo version that only manages the first question
