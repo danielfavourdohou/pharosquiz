@@ -12,7 +12,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Menu, Wallet, LogIn, LogOut, UserPlus } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { toast } from '@/components/ui/sonner';
-import { createClientComponentClient } from '@supabase/auth-helpers-react';
+import { createClient } from '@supabase/supabase-js';
 
 export default function Header() {
   const isMobile = useIsMobile();
@@ -20,7 +20,11 @@ export default function Header() {
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
   const navigate = useNavigate();
-  const supabase = createClientComponentClient();
+  
+  // Initialize Supabase client
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
   useEffect(() => {
     const checkSession = async () => {

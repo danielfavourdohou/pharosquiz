@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import { createClientComponentClient } from "@supabase/auth-helpers-react";
+import { createClient } from "@supabase/supabase-js";
 
 // Pages
 import Index from "./pages/Index";
@@ -20,7 +20,11 @@ import Register from "./pages/Register";
 import WalletConnect from "./pages/WalletConnect";
 
 const queryClient = new QueryClient();
-const supabaseClient = createClientComponentClient();
+
+// Initialize Supabase client 
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
 const App = () => (
   <ThemeProvider defaultTheme="dark">

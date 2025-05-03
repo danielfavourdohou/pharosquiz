@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,12 +5,16 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Layout from '@/components/layout/Layout';
 import { toast } from '@/components/ui/sonner';
 import { Wallet, ArrowLeft } from 'lucide-react';
-import { createClientComponentClient } from '@supabase/auth-helpers-react';
+import { createClient } from '@supabase/supabase-js';
 
 const WalletConnect = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const navigate = useNavigate();
-  const supabase = createClientComponentClient();
+  
+  // Initialize Supabase client
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
   const connectMetaMask = async () => {
     if (!window.ethereum) {
