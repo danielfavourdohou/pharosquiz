@@ -1,155 +1,145 @@
 
-import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { toast } from '@/components/ui/sonner';
-import Layout from '@/components/layout/Layout';
-import { LogIn } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
 
-const formSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-const Login = () => {
+export default function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { signIn, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn } = useAuth();
+  const { toast } = useToast();
   
-  const returnUrl = (location.state as { returnUrl?: string })?.returnUrl || '/';
+  // Get returnUrl from query params
+  const searchParams = new URLSearchParams(location.search);
+  const returnUrl = searchParams.get('returnUrl') || '/dashboard';
   
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      setIsLoading(true);
-      await signIn(values.email, values.password);
-      toast.success('Logged in successfully!');
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (isAuthenticated) {
       navigate(returnUrl);
-    } catch (error) {
-      console.error('Login error:', error);
+    }
+  }, [isAuthenticated, navigate, returnUrl]);
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      const { error } = await signIn({ email, password });
+      
+      if (error) {
+        console.error('Login error:', error);
+        toast({
+          variant: "destructive",
+          title: "Login failed",
+          description: error.message,
+        });
+        return;
+      }
+      
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+      });
+      
+      // Navigate to return URL or dashboard
+      navigate(returnUrl);
+    } catch (error: any) {
+      console.error('Unexpected login error:', error);
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: error?.message || "An unexpected error occurred",
+      });
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-16 flex items-center justify-center">
-        <Card className="w-full max-w-md border border-primary/20">
-          <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold gradient-text">
-              Login to PharosQuiz
-            </CardTitle>
-            <CardDescription>
-              Enter your credentials to access your account
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="name@example.com" 
-                          type="email" 
-                          {...field} 
-                          className="border-primary/20"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="••••••••" 
-                          type="password" 
-                          {...field}
-                          className="border-primary/20" 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button 
-                  type="submit" 
-                  className="w-full gradient-bg" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                      <span>Logging in...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <LogIn className="h-4 w-4" />
-                      <span>Login</span>
-                    </div>
-                  )}
-                </Button>
-              </form>
-            </Form>
-            <div className="mt-4">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-primary/20" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">or</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <Button variant="outline" className="w-full border-primary/20" onClick={() => navigate('/wallet-connect')}>
-                  Connect Wallet
-                </Button>
-              </div>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-pharos-primary/20 rounded-full blur-[100px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-pharos-secondary/20 rounded-full blur-[100px]" />
+      </div>
+      
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-block mb-6">
+            <div className="h-12 w-12 rounded-full gradient-bg flex items-center justify-center text-black font-bold text-xl mx-auto">
+              P
             </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-2 text-center text-sm">
-            <div className="text-muted-foreground">
+          </Link>
+          <h1 className="text-2xl font-bold">Welcome back</h1>
+          <p className="text-muted-foreground mt-2">
+            Log in to your account to continue
+          </p>
+        </div>
+        
+        <div className="bg-card border rounded-xl p-6 shadow-lg">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block mb-1 text-sm font-medium">
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                disabled={isLoading}
+              />
+            </div>
+            
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </label>
+                <Link to="/forgot-password" className="text-xs text-pharos-primary hover:text-pharos-primary/80">
+                  Forgot password?
+                </Link>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                disabled={isLoading}
+              />
+            </div>
+            
+            <Button type="submit" className="w-full gradient-bg" disabled={isLoading}>
+              {isLoading ? "Signing in..." : "Sign In"}
+            </Button>
+          </form>
+          
+          <div className="mt-6 text-center text-sm">
+            <p className="text-muted-foreground">
               Don't have an account?{" "}
-              <Link to="/register" className="text-primary hover:underline">
+              <Link to={`/register${location.search}`} className="text-pharos-primary hover:underline">
                 Sign up
               </Link>
-            </div>
-            <div>
-              <Link to="/forgot-password" className="text-primary hover:underline text-sm">
-                Forgot your password?
-              </Link>
-            </div>
-          </CardFooter>
-        </Card>
+            </p>
+          </div>
+        </div>
+        
+        <div className="mt-8 text-center">
+          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
+            Back to home page
+          </Link>
+        </div>
       </div>
-    </Layout>
+    </div>
   );
-};
-
-export default Login;
+}

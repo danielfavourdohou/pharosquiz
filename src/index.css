@@ -190,3 +190,14 @@
 .animate-fade-in {
   animation: fade-in 0.5s ease-out forwards;
 }
+
+/* Responsive utilities */
+@media (min-width: 475px) {
+  .xs\:inline-block {
+    display: inline-block;
+  }
+  
+  .xs\:flex-row {
+    flex-direction: row;
+  }
+}

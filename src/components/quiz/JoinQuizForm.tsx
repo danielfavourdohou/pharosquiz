@@ -41,11 +41,10 @@ export default function JoinQuizForm() {
     // Redirect to login if not authenticated
     if (!isAuthenticated) {
       toast({
-        variant: "destructive",
         title: "Authentication Required",
         description: "Please log in to join a quiz",
       });
-      navigate('/login', { state: { returnUrl: `/join-quiz` } });
+      navigate(`/login?returnUrl=/quiz-lobby/${quizCode}`);
       return;
     }
     

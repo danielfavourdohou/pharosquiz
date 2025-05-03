@@ -1,151 +1,167 @@
 
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import Layout from '@/components/layout/Layout';
-import { UserPlus } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
 
-const formSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string().min(6, 'Please confirm your password'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
-
-const Register = () => {
+export default function Register() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { signUp, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const { signUp } = useAuth();
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-      confirmPassword: '',
-    },
-  });
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const location = useLocation();
+  const { toast } = useToast();
+  
+  // Get returnUrl from query params
+  const searchParams = new URLSearchParams(location.search);
+  const returnUrl = searchParams.get('returnUrl') || '/dashboard';
+  
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(returnUrl);
+    }
+  }, [isAuthenticated, navigate, returnUrl]);
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Passwords don't match",
+        description: "Please make sure your passwords match",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    
     try {
-      setIsLoading(true);
-      await signUp(values.email, values.password);
-      navigate('/login');
-    } catch (error) {
-      console.error('Registration error:', error);
+      const { error } = await signUp({ email, password });
+      
+      if (error) {
+        console.error('Signup error:', error);
+        toast({
+          variant: "destructive",
+          title: "Registration failed",
+          description: error.message,
+        });
+        return;
+      }
+      
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created. You can now log in.",
+      });
+      
+      // Navigate to login page with the same returnUrl
+      navigate(`/login${location.search}`);
+    } catch (error: any) {
+      console.error('Unexpected signup error:', error);
+      toast({
+        variant: "destructive",
+        title: "Registration failed",
+        description: error?.message || "An unexpected error occurred",
+      });
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-16 flex items-center justify-center">
-        <Card className="w-full max-w-md border border-primary/20">
-          <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold gradient-text">
-              Create an Account
-            </CardTitle>
-            <CardDescription>
-              Sign up to create and participate in quizzes
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="name@example.com" 
-                          type="email" 
-                          {...field} 
-                          className="border-primary/20"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="••••••••" 
-                          type="password" 
-                          {...field}
-                          className="border-primary/20" 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="••••••••" 
-                          type="password" 
-                          {...field}
-                          className="border-primary/20" 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button 
-                  type="submit" 
-                  className="w-full gradient-bg" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                      <span>Creating account...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <UserPlus className="h-4 w-4" />
-                      <span>Sign Up</span>
-                    </div>
-                  )}
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-          <CardFooter className="text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link to="/login" className="text-primary hover:underline ml-1">
-              Log in
-            </Link>
-          </CardFooter>
-        </Card>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-pharos-primary/20 rounded-full blur-[100px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-pharos-secondary/20 rounded-full blur-[100px]" />
       </div>
-    </Layout>
+      
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-block mb-6">
+            <div className="h-12 w-12 rounded-full gradient-bg flex items-center justify-center text-black font-bold text-xl mx-auto">
+              P
+            </div>
+          </Link>
+          <h1 className="text-2xl font-bold">Create your account</h1>
+          <p className="text-muted-foreground mt-2">
+            Sign up to start creating and joining quizzes
+          </p>
+        </div>
+        
+        <div className="bg-card border rounded-xl p-6 shadow-lg">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block mb-1 text-sm font-medium">
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                disabled={isLoading}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="password" className="block mb-1 text-sm font-medium">
+                Password
+              </label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                disabled={isLoading}
+                minLength={6}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="confirm-password" className="block mb-1 text-sm font-medium">
+                Confirm Password
+              </label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                disabled={isLoading}
+              />
+            </div>
+            
+            <Button type="submit" className="w-full gradient-bg" disabled={isLoading}>
+              {isLoading ? "Creating account..." : "Create Account"}
+            </Button>
+          </form>
+          
+          <div className="mt-6 text-center text-sm">
+            <p className="text-muted-foreground">
+              Already have an account?{" "}
+              <Link to={`/login${location.search}`} className="text-pharos-primary hover:underline">
+                Sign in
+              </Link>
+            </p>
+          </div>
+        </div>
+        
+        <div className="mt-8 text-center">
+          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
+            Back to home page
+          </Link>
+        </div>
+      </div>
+    </div>
   );
-};
-
-export default Register;
+}
