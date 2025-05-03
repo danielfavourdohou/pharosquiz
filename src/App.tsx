@@ -5,7 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import { createClient } from "@supabase/supabase-js";
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 // Pages
 import Index from "./pages/Index";
@@ -21,35 +22,40 @@ import WalletConnect from "./pages/WalletConnect";
 
 const queryClient = new QueryClient();
 
-// Initialize Supabase client 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+const App = () => {
+  if (!isSupabaseConfigured()) {
+    console.warn(
+      "Supabase is not properly configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables."
+    );
+  }
 
-const App = () => (
-  <ThemeProvider defaultTheme="dark">
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/wallet-connect" element={<WalletConnect />} />
-            <Route path="/join-quiz" element={<JoinQuiz />} />
-            <Route path="/create-quiz" element={<CreateQuiz />} />
-            <Route path="/quiz-lobby/:quizCode" element={<QuizLobby />} />
-            <Route path="/play-quiz/:quizCode" element={<PlayQuiz />} />
-            <Route path="/quiz-results/:quizCode" element={<QuizResults />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ThemeProvider>
-);
+  return (
+    <SessionContextProvider supabaseClient={supabase}>
+      <ThemeProvider defaultTheme="dark">
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/wallet-connect" element={<WalletConnect />} />
+                <Route path="/join-quiz" element={<JoinQuiz />} />
+                <Route path="/create-quiz" element={<CreateQuiz />} />
+                <Route path="/quiz-lobby/:quizCode" element={<QuizLobby />} />
+                <Route path="/play-quiz/:quizCode" element={<PlayQuiz />} />
+                <Route path="/quiz-results/:quizCode" element={<QuizResults />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </SessionContextProvider>
+  );
+};
 
 export default App;

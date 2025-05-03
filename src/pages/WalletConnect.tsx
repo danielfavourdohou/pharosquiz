@@ -5,17 +5,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Layout from '@/components/layout/Layout';
 import { toast } from '@/components/ui/sonner';
 import { Wallet, ArrowLeft } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 const WalletConnect = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const navigate = useNavigate();
   
-  // Initialize Supabase client
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
   const connectMetaMask = async () => {
     if (!window.ethereum) {
       toast.error("MetaMask is not installed. Please install it to continue.");

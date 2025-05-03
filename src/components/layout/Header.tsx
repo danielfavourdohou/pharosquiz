@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Menu, Wallet, LogIn, LogOut, UserPlus } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { toast } from '@/components/ui/sonner';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 export default function Header() {
   const isMobile = useIsMobile();
@@ -21,11 +20,6 @@ export default function Header() {
   const [walletAddress, setWalletAddress] = useState('');
   const navigate = useNavigate();
   
-  // Initialize Supabase client
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
   useEffect(() => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
@@ -63,7 +57,7 @@ export default function Header() {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
