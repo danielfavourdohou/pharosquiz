@@ -35,7 +35,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link to="/" className="text-muted-foreground hover:text-pharos-primary transition-colors">Documentation</Link></li>
               <li><Link to="/" className="text-muted-foreground hover:text-pharos-primary transition-colors">FAQs</Link></li>
-              <li><a href="https://pharos.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-pharos-primary transition-colors">Pharos Blockchain</a></li>
+              <li><a href="https://www.buildonpharos.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-pharos-primary transition-colors">Pharos Blockchain</a></li>
             </ul>
           </div>
 
