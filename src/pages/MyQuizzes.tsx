@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -69,10 +68,8 @@ const MyQuizzes = () => {
         }
       } catch (error) {
         console.error('Error fetching quizzes:', error);
-        toast({
-          title: "Failed to load quizzes",
-          description: "Please try refreshing the page.",
-          variant: "destructive"
+        toast("Failed to load quizzes", {
+          description: "Please try refreshing the page."
         });
       } finally {
         setIsLoading(false);

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -52,10 +51,8 @@ export default function Profile() {
         setUsername(data.username || '');
       } catch (error) {
         console.error('Error fetching profile:', error);
-        toast({
-          title: "Failed to load profile",
-          description: "Please try refreshing the page.",
-          variant: "destructive"
+        toast("Failed to load profile", {
+          description: "Please try refreshing the page."
         });
       } finally {
         setIsLoading(false);
@@ -80,17 +77,14 @@ export default function Profile() {
       
       if (error) throw error;
       
-      toast({
-        title: "Profile updated successfully!",
+      toast("Profile updated successfully!", {
         description: "Your changes have been saved.",
         icon: <Check className="h-4 w-4" />
       });
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast({
-        title: "Failed to update profile",
-        description: "Please try again.",
-        variant: "destructive"
+      toast("Failed to update profile", {
+        description: "Please try again."
       });
     } finally {
       setIsSaving(false);

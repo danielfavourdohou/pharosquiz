@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -52,19 +51,15 @@ const CreateQuiz = () => {
     
     // Validation
     if (!title) {
-      toast({
-        variant: "destructive",
-        title: "Missing Title",
-        description: "Please enter a quiz title",
+      toast("Missing Title", {
+        description: "Please enter a quiz title"
       });
       return;
     }
 
     if (!user) {
-      toast({
-        variant: "destructive",
-        title: "Authentication Error",
-        description: "You must be logged in to create a quiz",
+      toast("Authentication Error", {
+        description: "You must be logged in to create a quiz"
       });
       return;
     }
@@ -75,10 +70,8 @@ const CreateQuiz = () => {
     );
     
     if (invalidQuestions.length > 0) {
-      toast({
-        variant: "destructive",
-        title: "Incomplete Questions",
-        description: `Please complete all questions and options before submitting.`,
+      toast("Incomplete Questions", {
+        description: `Please complete all questions and options before submitting.`
       });
       return;
     }
@@ -104,10 +97,8 @@ const CreateQuiz = () => {
       
       if (quizError) {
         console.error('Error creating quiz:', quizError);
-        toast({
-          variant: "destructive",
-          title: "Error Creating Quiz",
-          description: quizError.message,
+        toast("Error Creating Quiz", {
+          description: quizError.message
         });
         return;
       }
@@ -142,19 +133,16 @@ const CreateQuiz = () => {
         await supabase.from('options').insert(optionsToInsert);
       }
       
-      toast({
-        title: "Quiz Created Successfully",
-        description: "Your quiz has been created and is ready to share.",
+      toast("Quiz Created Successfully", {
+        description: "Your quiz has been created and is ready to share."
       });
       
       // Navigate to the lobby with the new quiz code
       navigate(`/quiz-lobby/${quizData.code}`);
     } catch (error) {
       console.error('Error creating quiz:', error);
-      toast({
-        variant: "destructive",
-        title: "Error Creating Quiz",
-        description: "An unexpected error occurred. Please try again later.",
+      toast("Error Creating Quiz", {
+        description: "An unexpected error occurred. Please try again later."
       });
     } finally {
       setIsLoading(false);
@@ -213,10 +201,8 @@ const CreateQuiz = () => {
   
   const moveToQuestions = () => {
     if (!title) {
-      toast({
-        variant: "destructive",
-        title: "Missing Title",
-        description: "Please enter a quiz title before proceeding",
+      toast("Missing Title", {
+        description: "Please enter a quiz title before proceeding"
       });
       return;
     }

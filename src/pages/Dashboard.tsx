@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -118,10 +117,8 @@ export default function Dashboard() {
         setRecentActivity(mockActivity);
       } catch (error) {
         console.error('Error fetching user data:', error);
-        toast({
-          title: "Failed to load user data",
-          description: "Please try refreshing the page.",
-          variant: "destructive"
+        toast("Failed to load user data", {
+          description: "Please try refreshing the page."
         });
       } finally {
         setIsLoading(false);
