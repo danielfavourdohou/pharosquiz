@@ -1,73 +1,189 @@
-# Welcome to your Lovable project
+# 🚀 PharosQuiz Nexus
 
-## Project info
+*PharoQuiz Nexus is a real-time, Web3-powered quiz competition platform where users host, join, and win crypto-backed quizzes. Built for the future of interactive learning and decentralized gaming.*
 
-**URL**: https://lovable.dev/projects/507394d4-f135-4c6e-9ee6-6d447013e59d
+---
 
-## How can I edit this code?
+## 🌟 Overview
 
-There are several ways of editing your application.
+**PharosQuiz Nexus** combines the real-time excitement of quiz platforms like Slido and Kahoot with the decentralized power of blockchain. Players can host quizzes, fund prize pools, compete in real time, and win crypto rewards—backed by smart contracts on the **Pharos Tag Blockchain**.
 
-**Use Lovable**
+The platform is fully decentralized and integrates wallet-based authentication, smart contract-powered payouts, and live multiplayer quiz experiences. Whether you're a quiz creator or a participant, PharosQuiz is built to make knowledge rewarding—literally.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/507394d4-f135-4c6e-9ee6-6d447013e59d) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🧠 Key Features
 
-**Use your preferred IDE**
+### ✅ User Authentication & Wallet Integration
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+* Secure sign-up/login using email and password.
+* MetaMask and Web3 wallet integration (via Web3Modal + Ethers.js).
+* Each user’s wallet is linked to their identity for reward distribution.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 🎮 Quiz Hosting
 
-Follow these steps:
+* Any registered user can host a quiz.
+* Hosts create up to **30 timed multiple-choice questions**.
+* Each question has a 15–20 second timer and one correct answer.
+* A **6-digit unique quiz code** is generated for participants to join.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 🧑‍🤝‍🧑 Joining Quizzes
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+* Players join live quizzes using the 6-digit code.
+* Real-time participation powered by **WebSockets (Socket.io)**.
+* A shared, synchronized quiz flow for all participants.
 
-# Step 3: Install the necessary dependencies.
-npm i
+### 🥇 Leaderboard & Rewards
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+* Live leaderboard updates after each question.
+* Top 3 players are automatically awarded crypto prizes upon completion.
+* Rewards are distributed by **smart contracts**, with funds pooled by the host.
+
+### 💰 Crypto Prize Pool
+
+* Quiz hosts must fund a prize pool when creating a quiz.
+* Smart contracts lock the funds securely and release them based on leaderboard positions:
+
+  * 🥇 1st Place: 50%
+  * 🥈 2nd Place: 30%
+  * 🥉 3rd Place: 20%
+
+---
+
+## 🖌️ Design Language & Color Palette
+
+PharosQuiz follows a bold, futuristic Web3 design theme.
+
+| Color Name       | HEX       | Usage                        |
+| ---------------- | --------- | ---------------------------- |
+| `pharosNavy`     | `#0B0F2A` | Background / base tone       |
+| `neonCyan`       | `#00FFF0` | Primary buttons / highlights |
+| `electricPurple` | `#8A00FF` | Secondary accents            |
+| `magentaGlow`    | `#FF4ECD` | Alerts, error states         |
+| `tealMist`       | `#1CE1C1` | Success states               |
+| `slateWhite`     | `#F7F9FC` | Text & cards                 |
+| `ironGray`       | `#2E3A59` | Headings / UI contrast       |
+
+---
+
+## ⚙️ Tech Stack
+
+### 🔗 Web3 / Smart Contracts
+
+* **Blockchain**: [Pharos Tag Blockchain](https://pharoschain.com)
+* **Smart Contracts**: Solidity or Pharos-compatible L1 (e.g., Cairo or Clarity)
+* **Wallet Integration**: MetaMask, Ethers.js
+
+### 🖥️ Frontend
+
+* **Framework**: React + Tailwind CSS
+* **Routing**: React Router v6
+* **Real-time**: Socket.io-client
+* **State**: React Context or Redux Toolkit
+
+### 🔧 Backend
+
+* **API Server**: Node.js (Express.js)
+* **Database**: PostgreSQL / Supabase / MongoDB (choose based on use case)
+* **Auth**: JWT + email-based registration
+* **WebSockets**: Socket.io
+
+---
+
+## 📂 Project Structure
+
+```
+pharosquiz/
+│
+├── frontend/
+│   ├── components/
+│   ├── pages/
+│   ├── contexts/
+│   ├── services/       ← API and WebSocket clients
+│   └── styles/         ← Tailwind and global styles
+│
+├── backend/
+│   ├── routes/
+│   ├── controllers/
+│   ├── models/
+│   ├── sockets/
+│   └── services/
+│
+└── smart-contracts/
+    ├── QuizContract.sol
+    ├── PrizeDistributor.sol
+    └── ...
+```
+
+---
+
+## 🔧 Environment Variables
+
+Create a `.env.local` file in the `frontend/` directory with:
+
+```env
+REACT_APP_API_BASE_URL=https://pharosquiz-backend.devnet.pharoschain.com/api
+REACT_APP_WS_URL=wss://pharosquiz-backend.devnet.pharoschain.com/ws
+```
+
+And in the backend:
+
+```env
+PORT=5000
+JWT_SECRET=your_secure_secret
+DB_URI=your_database_uri
+PHAROS_RPC_URL=https://rpc.pharoschain.com
+SMART_CONTRACT_ADDRESS=0x...
+```
+
+---
+
+## 🚀 Getting Started
+
+### 🖥️ Frontend Setup
+
+```bash
+cd frontend
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### 🛠️ Backend Setup
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+cd backend
+npm install
+npm run dev
+```
 
-**Use GitHub Codespaces**
+### 🧾 Smart Contract Deployment
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Use a Pharos Tag Blockchain-compatible toolchain (like Pharos Studio or Remix with injected provider) to compile and deploy smart contracts. Ensure `SMART_CONTRACT_ADDRESS` is updated in `.env` and frontend contract interactions.
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+## ✨ Coming Soon
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+* Live chat rooms per quiz
+* NFT badges for top players
+* DAO-powered quiz moderation
+* Quiz marketplaces and public archives
+* Reputation scoring for hosts
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/507394d4-f135-4c6e-9ee6-6d447013e59d) and click on Share -> Publish.
+## 🤝 Contributing
 
-## Can I connect a custom domain to my Lovable project?
+We welcome contributions from developers, designers, and community builders. Please fork the repo, open PRs, or file issues.
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 📫 Contact
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+* Twitter: [@PharosQuiz](https://twitter.com/PharosQuiz)
+* Email: `hello@pharosquiz.com`
+* Discord: Coming soon
+
+---
+
+### © 2025 PharosQuiz Nexus. All rights reserved.
