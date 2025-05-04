@@ -12,9 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from '@/components/ui/sonner';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import QuestionForm from '@/components/quiz/QuestionForm';
+import { PlusCircle, Trash2, Check } from 'lucide-react';
 
 interface Question {
   text: string;
@@ -24,18 +26,18 @@ interface Question {
 
 const CreateQuiz = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { user } = useAuth();
   
   // Quiz form state
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [numQuestions, setNumQuestions] = useState('10');
+  const [numQuestions, setNumQuestions] = useState('5');
   const [timePerQuestion, setTimePerQuestion] = useState('15');
   const [prizePool, setPrizePool] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [activeStep, setActiveStep] = useState(0); // 0: Basic Info, 1: Questions
   
-  // Questions state (would be expanded in a real implementation)
+  // Initialize questions based on numQuestions
   const [questions, setQuestions] = useState<Question[]>([
     {
       text: '',
@@ -63,6 +65,20 @@ const CreateQuiz = () => {
         variant: "destructive",
         title: "Authentication Error",
         description: "You must be logged in to create a quiz",
+      });
+      return;
+    }
+
+    // Validate all questions
+    const invalidQuestions = questions.filter(
+      (q, idx) => !q.text || q.options.some(option => !option)
+    );
+    
+    if (invalidQuestions.length > 0) {
+      toast({
+        variant: "destructive",
+        title: "Incomplete Questions",
+        description: `Please complete all questions and options before submitting.`,
       });
       return;
     }
@@ -95,30 +111,35 @@ const CreateQuiz = () => {
         });
         return;
       }
-      
-      // For demo, we'll just create the first question
-      if (questions[0].text) {
-        const { error: questionError } = await supabase
+
+      // Add all questions
+      for (let i = 0; i < questions.length; i++) {
+        const question = questions[i];
+        
+        const { data: questionData, error: questionError } = await supabase
           .from('questions')
           .insert({
             quiz_id: quizData.id,
-            question_text: questions[0].text,
-            correct_option: questions[0].correctOptionIndex,
-            order_index: 0,
-          });
+            question_text: question.text,
+            correct_option: question.correctOptionIndex,
+            order_index: i,
+          })
+          .select('id')
+          .single();
         
         if (questionError) {
-          console.error('Error creating question:', questionError);
-        } else {
-          // Add options for the question
-          const optionsToInsert = questions[0].options.map((optionText, index) => ({
-            question_id: quizData.id, // This would actually be the question's ID in a real implementation
-            option_text: optionText || `Option ${index + 1}`,
-            option_index: index,
-          }));
-          
-          await supabase.from('options').insert(optionsToInsert);
+          console.error(`Error creating question ${i + 1}:`, questionError);
+          continue;
         }
+        
+        // Add options for each question
+        const optionsToInsert = question.options.map((optionText, index) => ({
+          question_id: questionData.id,
+          option_text: optionText,
+          option_index: index,
+        }));
+        
+        await supabase.from('options').insert(optionsToInsert);
       }
       
       toast({
@@ -140,39 +161,106 @@ const CreateQuiz = () => {
     }
   };
   
-  // Simple demo version that only manages the first question
-  const updateQuestionText = (text: string) => {
+  const handleAddQuestion = () => {
+    const currentCount = questions.length;
+    const targetCount = parseInt(numQuestions);
+    
+    if (currentCount < targetCount) {
+      setQuestions([
+        ...questions,
+        {
+          text: '',
+          options: ['', '', '', ''],
+          correctOptionIndex: 0
+        }
+      ]);
+    }
+  };
+  
+  const handleRemoveQuestion = (index: number) => {
     const newQuestions = [...questions];
-    newQuestions[0] = { ...newQuestions[0], text };
+    newQuestions.splice(index, 1);
     setQuestions(newQuestions);
   };
   
-  const updateQuestionOption = (index: number, text: string) => {
+  const updateQuestion = (index: number, updatedQuestion: Question) => {
     const newQuestions = [...questions];
-    const newOptions = [...newQuestions[0].options];
-    newOptions[index] = text;
-    newQuestions[0] = { ...newQuestions[0], options: newOptions };
+    newQuestions[index] = updatedQuestion;
     setQuestions(newQuestions);
   };
-  
-  const updateCorrectAnswer = (index: number) => {
-    const newQuestions = [...questions];
-    newQuestions[0] = { ...newQuestions[0], correctOptionIndex: index };
-    setQuestions(newQuestions);
+
+  const handleNumQuestionsChange = (value: string) => {
+    setNumQuestions(value);
+    const numQuestionsInt = parseInt(value);
+    
+    // Adjust questions array based on new count
+    if (numQuestionsInt > questions.length) {
+      // Add more empty questions
+      const newQuestions = [...questions];
+      for (let i = questions.length; i < numQuestionsInt; i++) {
+        newQuestions.push({
+          text: '',
+          options: ['', '', '', ''],
+          correctOptionIndex: 0
+        });
+      }
+      setQuestions(newQuestions);
+    } else if (numQuestionsInt < questions.length) {
+      // Remove excess questions
+      setQuestions(questions.slice(0, numQuestionsInt));
+    }
   };
   
+  const moveToQuestions = () => {
+    if (!title) {
+      toast({
+        variant: "destructive",
+        title: "Missing Title",
+        description: "Please enter a quiz title before proceeding",
+      });
+      return;
+    }
+    setActiveStep(1);
+  };
+
+  const moveToBasicInfo = () => {
+    setActiveStep(0);
+  };
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">Create a New Quiz</h1>
           
-          <div className="bg-card border rounded-xl p-6 shadow-sm mb-8">
-            <h2 className="text-xl font-medium mb-4">Quiz Details</h2>
+          {/* Steps Indicator */}
+          <div className="flex mb-8">
+            <div 
+              className={`flex-1 pb-2 cursor-pointer ${activeStep === 0 ? 'border-b-2 border-neonCyan text-neonCyan' : 'border-b border-gray-300 text-gray-500'}`}
+              onClick={moveToBasicInfo}
+            >
+              <div className="flex items-center">
+                <span className={`w-8 h-8 rounded-full ${activeStep === 0 ? 'bg-neonCyan text-pharosNavy' : 'bg-gray-300 text-gray-700'} flex items-center justify-center mr-2`}>1</span>
+                <span className="font-medium">Quiz Details</span>
+              </div>
+            </div>
             
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Basic quiz information */}
+            <div 
+              className={`flex-1 pb-2 cursor-pointer ${activeStep === 1 ? 'border-b-2 border-neonCyan text-neonCyan' : 'border-b border-gray-300 text-gray-500'}`}
+              onClick={title ? moveToQuestions : undefined}
+            >
+              <div className="flex items-center">
+                <span className={`w-8 h-8 rounded-full ${activeStep === 1 ? 'bg-neonCyan text-pharosNavy' : 'bg-gray-300 text-gray-700'} flex items-center justify-center mr-2`}>2</span>
+                <span className="font-medium">Questions</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-card border rounded-xl p-6 shadow-sm mb-8">
+            {activeStep === 0 ? (
+              /* Step 1: Basic Quiz Information */
               <div className="space-y-4">
+                <h2 className="text-xl font-medium mb-4">Quiz Details</h2>
                 <div>
                   <label htmlFor="title" className="block mb-2 text-sm font-medium">
                     Quiz Title
@@ -204,7 +292,7 @@ const CreateQuiz = () => {
                     <label htmlFor="numQuestions" className="block mb-2 text-sm font-medium">
                       Number of Questions
                     </label>
-                    <Select value={numQuestions} onValueChange={setNumQuestions}>
+                    <Select value={numQuestions} onValueChange={handleNumQuestionsChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
@@ -249,68 +337,81 @@ const CreateQuiz = () => {
                     />
                   </div>
                 </div>
-              </div>
-              
-              {/* Sample first question (in a real app, you'd add UI for multiple questions) */}
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-medium mb-4">Question 1</h3>
                 
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="q1-text" className="block mb-2 text-sm font-medium">
-                      Question Text
-                    </label>
-                    <Input
-                      id="q1-text"
-                      value={questions[0].text}
-                      onChange={(e) => updateQuestionText(e.target.value)}
-                      placeholder="Enter your question here..."
-                    />
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <label className="block text-sm font-medium">
-                      Answer Options
-                    </label>
-                    
-                    {questions[0].options.map((option, index) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <div className="flex-shrink-0">
-                          <input
-                            type="radio"
-                            id={`correct-${index}`}
-                            name="correct-answer"
-                            checked={questions[0].correctOptionIndex === index}
-                            onChange={() => updateCorrectAnswer(index)}
-                            className="mr-2"
-                          />
-                          <label htmlFor={`correct-${index}`} className="text-sm">
-                            Correct
-                          </label>
-                        </div>
-                        
-                        <Input
-                          value={option}
-                          onChange={(e) => updateQuestionOption(index, e.target.value)}
-                          placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                        />
-                      </div>
-                    ))}
-                  </div>
+                <div className="flex justify-end pt-4">
+                  <Button 
+                    onClick={moveToQuestions} 
+                    className="bg-neonCyan text-pharosNavy hover:bg-electricPurple hover:text-white"
+                    disabled={!title}
+                  >
+                    Next: Create Questions
+                  </Button>
                 </div>
               </div>
-              
-              {/* Add more questions UI would go here in a real implementation */}
-              <div className="text-center py-4 text-muted-foreground">
-                <p>In a complete implementation, you would add UI to create all {numQuestions} questions.</p>
-              </div>
-              
-              <div className="flex justify-end pt-4">
-                <Button type="submit" disabled={isLoading || !title} className="gradient-bg">
-                  {isLoading ? "Creating..." : "Create Quiz"}
-                </Button>
-              </div>
-            </form>
+            ) : (
+              /* Step 2: Questions Creation */
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <h2 className="text-xl font-medium mb-4">Create Questions</h2>
+                <div className="space-y-6">
+                  {questions.map((question, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-medium">Question {index + 1}</h3>
+                        {questions.length > 1 && (
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleRemoveQuestion(index)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <QuestionForm
+                        question={question}
+                        onChange={(updatedQuestion) => updateQuestion(index, updatedQuestion)}
+                      />
+                    </div>
+                  ))}
+                </div>
+                
+                {questions.length < parseInt(numQuestions) && (
+                  <div className="flex justify-center">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleAddQuestion}
+                      className="w-full max-w-md"
+                    >
+                      <PlusCircle className="h-5 w-5 mr-2" />
+                      Add Question
+                    </Button>
+                  </div>
+                )}
+                
+                <div className="flex justify-between pt-4">
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    onClick={moveToBasicInfo}
+                  >
+                    Back to Quiz Details
+                  </Button>
+                  
+                  <Button 
+                    type="submit" 
+                    disabled={isLoading} 
+                    className="bg-neonCyan text-pharosNavy hover:bg-electricPurple hover:text-white"
+                  >
+                    {isLoading ? "Creating..." : "Create Quiz"}
+                  </Button>
+                </div>
+              </form>
+            )}
           </div>
           
           <div className="bg-muted p-6 rounded-lg">

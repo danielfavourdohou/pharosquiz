@@ -20,6 +20,9 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import WalletConnect from "./pages/WalletConnect";
+import MyQuizzes from "./pages/MyQuizzes";
+import Profile from "./pages/Profile";
+import LeaderboardPage from "./pages/LeaderboardPage";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +40,7 @@ const App = () => {
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/join-quiz" element={<JoinQuiz />} />
                 
                 {/* Protected routes */}
                 <Route path="/dashboard" element={
@@ -49,10 +53,24 @@ const App = () => {
                     <WalletConnect />
                   </ProtectedRoute>
                 } />
-                <Route path="/join-quiz" element={<JoinQuiz />} />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
                 <Route path="/create-quiz" element={
                   <ProtectedRoute>
                     <CreateQuiz />
+                  </ProtectedRoute>
+                } />
+                <Route path="/my-quizzes" element={
+                  <ProtectedRoute>
+                    <MyQuizzes />
+                  </ProtectedRoute>
+                } />
+                <Route path="/leaderboard" element={
+                  <ProtectedRoute>
+                    <LeaderboardPage />
                   </ProtectedRoute>
                 } />
                 <Route path="/quiz-lobby/:quizCode" element={

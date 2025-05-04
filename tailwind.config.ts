@@ -1,37 +1,46 @@
-
 import type { Config } from "tailwindcss";
 import { fontFamily } from "tailwindcss/defaultTheme";
 
-const config: Config = {
-  darkMode: "class",
+const config = {
+  darkMode: ["class"],
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
   ],
+  prefix: "",
   theme: {
-    extend: {
-      fontFamily: {
-        sans: ["Inter var", ...fontFamily.sans],
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
       },
+    },
+    extend: {
       colors: {
+        // Main color palette
+        pharosNavy: "#0B0F2A",
+        neonCyan: "#00FFF0",
+        electricPurple: "#8A00FF",
+        magentaGlow: "#FF4ECD",
+        tealMist: "#1CE1C1",
+        slateWhite: "#F7F9FC",
+        ironGray: "#2E3A59",
+        
+        // Pre-existing colors (keep these)
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        pharos: {
-          primary: "hsl(var(--pharos-cyan))",
-          secondary: "hsl(var(--pharos-purple))",
-          navy: "hsl(var(--pharos-navy))",
-          cyan: "hsl(var(--pharos-cyan))",
-          purple: "hsl(var(--pharos-purple))",
-          magenta: "hsl(var(--pharos-magenta))",
-          teal: "hsl(var(--pharos-teal))",
-          slate: "hsl(var(--pharos-slate))",
-          gray: "hsl(var(--pharos-gray))",
-        },
+        "pharos-primary": "#9279FF",
+        "pharos-secondary": "#7B3DE2",
+        "pharos-purple": "#8E3EC1",
+        "pharos-magenta": "#E03C8D",
+        "pharos-cyan": "#3BD8F6",
+        "pharos-teal": "#00CBA2",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -66,23 +75,34 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        sans: ["var(--font-sans)", ...fontFamily.sans],
+      },
       keyframes: {
         "accordion-down": {
-          from: { height: '0' },
+          from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: '0' },
+          to: { height: "0" },
+        },
+        "pulse-scale": {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.05)" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-scale": "pulse-scale 2s infinite",
+      },
+      screens: {
+        'xs': '480px',
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
-};
+} satisfies Config
 
-export default config;
+export default config

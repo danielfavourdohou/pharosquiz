@@ -1,22 +1,43 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Layout from '@/components/layout/Layout';
 import { toast } from '@/components/ui/sonner';
-import { Wallet, ArrowLeft } from 'lucide-react';
+import { Wallet, ArrowLeft, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 
 const WalletConnect = () => {
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isMetamaskInstalled, setIsMetamaskInstalled] = useState(false);
+  const [isPhantomInstalled, setIsPhantomInstalled] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   
+  // Check if MetaMask and Phantom are installed
+  useEffect(() => {
+    const checkWallets = async () => {
+      // Check MetaMask
+      if (window.ethereum) {
+        setIsMetamaskInstalled(true);
+      }
+      
+      // Check Phantom
+      if (window.solana) {
+        setIsPhantomInstalled(true);
+      }
+    };
+    
+    checkWallets();
+  }, []);
+  
+  // Connect with MetaMask using SDK
   const connectMetaMask = async () => {
     if (!window.ethereum) {
       toast.error("MetaMask is not installed. Please install it to continue.");
+      window.open("https://metamask.io/download.html", "_blank");
       return;
     }
 
@@ -44,6 +65,16 @@ const WalletConnect = () => {
           toast.error("Failed to update user with wallet address");
           return;
         }
+        
+        // Also update the profiles table
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ wallet_address: address })
+          .eq('id', user.id);
+          
+        if (profileError) {
+          console.error("Error updating profile:", profileError);
+        }
       } else {
         // For non-logged-in users, create a new account with just the wallet
         // In a full implementation, this would involve a more complex flow
@@ -53,7 +84,7 @@ const WalletConnect = () => {
       }
 
       toast.success('Wallet connected successfully!');
-      navigate('/');
+      navigate('/profile');
     } catch (error: any) {
       console.error('Wallet connection error:', error);
       toast.error(error.message || 'Failed to connect wallet');
@@ -65,6 +96,7 @@ const WalletConnect = () => {
   const connectPhantom = async () => {
     if (!window.solana) {
       toast.error("Phantom wallet is not installed. Please install it to continue.");
+      window.open("https://phantom.app/", "_blank");
       return;
     }
 
@@ -85,6 +117,16 @@ const WalletConnect = () => {
           toast.error("Failed to update user with wallet address");
           return;
         }
+        
+        // Also update the profiles table
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ wallet_address: address })
+          .eq('id', user.id);
+          
+        if (profileError) {
+          console.error("Error updating profile:", profileError);
+        }
       } else {
         // For non-logged-in users, create a new account with just the wallet
         toast.error("Please log in before connecting your wallet");
@@ -93,7 +135,7 @@ const WalletConnect = () => {
       }
 
       toast.success('Wallet connected successfully!');
-      navigate('/');
+      navigate('/profile');
     } catch (error: any) {
       console.error('Wallet connection error:', error);
       toast.error(error.message || 'Failed to connect wallet');
@@ -121,7 +163,7 @@ const WalletConnect = () => {
               disabled={isConnecting}
             >
               {isConnecting ? (
-                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                <Loader2 className="animate-spin h-4 w-4" />
               ) : (
                 <Wallet className="h-5 w-5" />
               )}
@@ -134,7 +176,7 @@ const WalletConnect = () => {
               disabled={isConnecting}
             >
               {isConnecting ? (
-                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                <Loader2 className="animate-spin h-4 w-4" />
               ) : (
                 <Wallet className="h-5 w-5" />
               )}
