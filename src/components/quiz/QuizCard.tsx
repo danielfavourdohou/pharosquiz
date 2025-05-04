@@ -34,9 +34,8 @@ export default function QuizCard({
   const handleCopyCode = () => {
     if (code) {
       navigator.clipboard.writeText(code);
-      toast({
-        title: "Code copied!",
-        description: "Share this code with participants to join your quiz.",
+      toast("Code copied!", {
+        description: "Share this code with participants to join your quiz."
       });
     }
   };
