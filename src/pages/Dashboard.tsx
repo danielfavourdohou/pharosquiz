@@ -16,7 +16,7 @@ interface QuizActivity {
   code: string;
   date: string;
   type: 'hosted' | 'joined';
-  status: 'draft' | 'active' | 'completed';
+  status: 'draft' | 'active' | 'completed' | 'archived'; // Added 'archived' to fix type error
   score?: number;
   position?: number;
 }
