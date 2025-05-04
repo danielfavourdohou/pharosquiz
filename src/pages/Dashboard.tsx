@@ -26,7 +26,7 @@ export default function Dashboard() {
       icon: <Plus className="h-10 w-10 text-pharos-primary" />,
       action: () => navigate('/create-quiz'),
       buttonText: 'Create Quiz',
-      buttonVariant: 'default',
+      buttonVariant: 'default' as const,
       buttonClass: 'gradient-bg'
     },
     {

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -42,17 +41,7 @@ export default function Register() {
     setIsLoading(true);
     
     try {
-      const { error } = await signUp({ email, password });
-      
-      if (error) {
-        console.error('Signup error:', error);
-        toast({
-          variant: "destructive",
-          title: "Registration failed",
-          description: error.message,
-        });
-        return;
-      }
+      await signUp(email, password);
       
       toast({
         title: "Registration successful",
@@ -62,7 +51,7 @@ export default function Register() {
       // Navigate to login page with the same returnUrl
       navigate(`/login${location.search}`);
     } catch (error: any) {
-      console.error('Unexpected signup error:', error);
+      console.error('Signup error:', error);
       toast({
         variant: "destructive",
         title: "Registration failed",
